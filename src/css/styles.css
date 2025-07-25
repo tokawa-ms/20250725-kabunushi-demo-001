@@ -1,0 +1,207 @@
+/* Additional custom styles for the shareholder dialogue app */
+
+/* Ensure proper spacing and layout */
+.container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Chat bubble enhancements */
+.chat-bubble {
+    border-radius: 1rem;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chat-bubble::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+}
+
+.shareholder-bubble::before {
+    bottom: -10px;
+    left: 20px;
+    border-width: 10px 10px 0 0;
+    border-color: #1d4ed8 transparent transparent transparent;
+}
+
+.director-bubble::before {
+    bottom: -10px;
+    right: 20px;
+    border-width: 10px 0 0 10px;
+    border-color: #047857 transparent transparent transparent;
+}
+
+.system-bubble::before {
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 10px 10px 0 10px;
+    border-color: #7c3aed transparent transparent transparent;
+}
+
+/* PDF preview enhancements */
+.pdf-preview {
+    background: #f9fafb;
+    transition: all 0.3s ease;
+}
+
+.pdf-preview:hover {
+    border-color: #3b82f6;
+}
+
+/* File list styling */
+.file-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    background: #f9fafb;
+    transition: all 0.2s ease;
+}
+
+.file-item:hover {
+    background: #f3f4f6;
+    border-color: #3b82f6;
+}
+
+.file-item.selected {
+    background: #dbeafe;
+    border-color: #3b82f6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    .chat-bubble {
+        max-width: 95%;
+    }
+    
+    #pdfControls {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    #pdfControls button {
+        width: 100%;
+    }
+}
+
+/* Loading and status indicators */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-indicator.connected {
+    color: #10b981;
+}
+
+.status-indicator.disconnected {
+    color: #ef4444;
+}
+
+.status-indicator.connecting {
+    color: #f59e0b;
+}
+
+/* Animation improvements */
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Enhanced button styles */
+button:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Markdown content styling within chat bubbles */
+.chat-content h1,
+.chat-content h2,
+.chat-content h3 {
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.chat-content h1 {
+    font-size: 1.25rem;
+}
+
+.chat-content h2 {
+    font-size: 1.125rem;
+}
+
+.chat-content h3 {
+    font-size: 1rem;
+}
+
+.chat-content p {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+.chat-content ul,
+.chat-content ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.chat-content li {
+    margin: 0.25rem 0;
+}
+
+.chat-content strong {
+    font-weight: bold;
+}
+
+.chat-content em {
+    font-style: italic;
+}
+
+.chat-content code {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+}
+
+.chat-content pre {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 0.5rem 0;
+}
+
+.chat-content blockquote {
+    border-left: 4px solid rgba(255, 255, 255, 0.3);
+    padding-left: 1rem;
+    margin: 0.5rem 0;
+    font-style: italic;
+}
