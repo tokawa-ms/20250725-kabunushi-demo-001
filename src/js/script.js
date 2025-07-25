@@ -846,7 +846,27 @@ ${conversationHistory}`;
         `;
 
         this.elements.dialogueContainer.appendChild(messageElement);
-        this.elements.dialogueContainer.scrollTop = this.elements.dialogueContainer.scrollHeight;
+        
+        // スムーズに最新メッセージまでスクロール
+        this.scrollToLatestMessage();
+    }
+
+    scrollToLatestMessage() {
+        console.log('📜 最新メッセージまでスクロール中...');
+        
+        // 要素が追加された後、少し遅延してスクロール実行
+        setTimeout(() => {
+            const container = this.elements.dialogueContainer;
+            if (container) {
+                // スムーズスクロールで最下部まで移動
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+                
+                console.log(`📜 スクロール完了: ${container.scrollTop}/${container.scrollHeight}`);
+            }
+        }, 100);
     }
 
     renderMarkdown(text) {

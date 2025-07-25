@@ -27,6 +27,47 @@
     padding-right: 1rem;
 }
 
+/* Dialogue Container Auto-Expansion */
+#dialogueContainer {
+    max-height: 60vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    padding-right: 8px; /* 스크롤바 공간 확보 */
+}
+
+/* 스크롤바 스타일링 */
+#dialogueContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+#dialogueContainer::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+#dialogueContainer::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+#dialogueContainer::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 빈 상태 최소 높이 설정 */
+#dialogueContainer:empty {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#dialogueContainer:empty::after {
+    content: "対話メッセージがここに表示されます";
+    color: #9ca3af;
+    font-style: italic;
+}
+
 /* Chat bubble enhancements */
 .chat-bubble {
     border-radius: 1rem;
