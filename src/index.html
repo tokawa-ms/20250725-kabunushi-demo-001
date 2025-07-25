@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>株主対話デモアプリケーション</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Custom styles for better UI */
+        .chat-bubble {
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .shareholder-bubble {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        .director-bubble {
+            background: linear-gradient(135deg, #10b981, #047857);
+        }
+        .system-bubble {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+        .pdf-preview {
+            border: 2px dashed #d1d5db;
+            min-height: 400px;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 text-center mb-2">📊 株主対話デモアプリケーション</h1>
+            <p class="text-gray-600 text-center">Azure OpenAI GPT-4.1-miniを使用した株主と取締役の対話シミュレーション</p>
+        </header>
+
+        <!-- Connection Settings -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">🔧 Azure OpenAI 接続設定</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">エンドポイント URL</label>
+                    <input type="text" id="endpoint" placeholder="https://your-resource.openai.azure.com/" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">API キー</label>
+                    <input type="password" id="apiKey" placeholder="あなたのAPIキー" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">デプロイメント名</label>
+                    <input type="text" id="deploymentName" placeholder="gpt-4o-mini" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">API バージョン</label>
+                    <input type="text" id="apiVersion" placeholder="2024-02-15-preview" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button id="connectBtn" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition-colors">
+                    🔗 接続テスト
+                </button>
+                <button id="saveSettingsBtn" 
+                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md transition-colors">
+                    💾 設定保存
+                </button>
+                <div id="connectionStatus" class="flex items-center text-sm">
+                    <span class="text-gray-500">未接続</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Left Panel: PDF Upload and Preview -->
+            <div class="space-y-6">
+                <!-- PDF Upload Section -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">📄 PDF資料アップロード</h2>
+                    <div class="mb-4">
+                        <input type="file" id="pdfInput" accept=".pdf" multiple 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-sm text-gray-500 mt-1">決算短信、株主総会資料などのPDFファイルをアップロードしてください</p>
+                    </div>
+                    
+                    <!-- Uploaded Files List -->
+                    <div id="filesList" class="space-y-2 mb-4">
+                        <!-- Files will be listed here -->
+                    </div>
+                </div>
+
+                <!-- PDF Preview Section -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">👁️ PDFプレビュー</h2>
+                    <div id="pdfPreview" class="pdf-preview rounded-lg p-4 text-center text-gray-500">
+                        PDFファイルを選択するとここにプレビューが表示されます
+                    </div>
+                    <!-- PDF Navigation Controls -->
+                    <div id="pdfControls" class="mt-4 flex justify-between items-center hidden">
+                        <button id="prevPage" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md">
+                            ⬅️ 前のページ
+                        </button>
+                        <span id="pageInfo" class="text-gray-600">ページ 1 / 1</span>
+                        <button id="nextPage" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md">
+                            次のページ ➡️
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Dialogue System -->
+            <div class="space-y-6">
+                <!-- Dialogue Control -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">💬 対話シミュレーション</h2>
+                    <div class="flex gap-4 mb-4">
+                        <button id="startDialogueBtn" 
+                                class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            🚀 対話開始
+                        </button>
+                        <button id="clearDialogueBtn" 
+                                class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md transition-colors">
+                            🗑️ 対話クリア
+                        </button>
+                    </div>
+                    <div id="dialogueStatus" class="text-sm text-gray-600">
+                        Azure OpenAIに接続してPDFファイルをアップロードしてから対話を開始してください
+                    </div>
+                </div>
+
+                <!-- Dialogue Display -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">対話履歴</h3>
+                    <div id="dialogueContainer" class="space-y-4 max-h-96 overflow-y-auto">
+                        <!-- Dialogue messages will appear here -->
+                    </div>
+                    <div id="loadingIndicator" class="hidden flex justify-center mt-4">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-8 text-center text-gray-500 text-sm">
+            <p>株主対話デモアプリケーション - Azure OpenAI GPT-4.1-mini Powered</p>
+        </footer>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
