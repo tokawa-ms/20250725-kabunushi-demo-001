@@ -49,6 +49,13 @@
 .pdf-preview {
     background: #f9fafb;
     transition: all 0.3s ease;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.pdf-preview canvas {
+    max-width: 100%;
+    height: auto;
 }
 
 .pdf-preview:hover {
