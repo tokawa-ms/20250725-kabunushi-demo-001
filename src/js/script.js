@@ -16,7 +16,8 @@ class ShareholderDialogueApp {
             dialogueHistory: [],
             conversationTurn: 0,
             pdfContent: '',
-            isDialogueInProgress: false
+            isDialogueInProgress: false,
+            selectedLanguage: 'ja'
         };
 
         // Azure OpenAI設定
@@ -25,6 +26,66 @@ class ShareholderDialogueApp {
             apiKey: '',
             deploymentName: '',
             apiVersion: '2024-02-15-preview'
+        };
+
+        // 言語設定
+        this.languageConfig = {
+            ja: {
+                name: '日本語',
+                shareholderPrompt: 'あなたは経験豊富な個人株主です。提供された決算資料や株主総会資料を基に、株主総会で取締役に対して行う質問を日本語で生成してください。',
+                directorPrompt: 'あなたは会社の取締役です。株主総会で株主からの質問に対して日本語で回答してください。',
+                summaryPrompt: '以下の株主総会での株主と取締役の対話を日本語で要約してください。',
+                startMessage: '対話を開始します。株主からの質問を生成中...',
+                endMessage: '対話が完了しました。「対話開始」ボタンで新しい対話を始めることができます。'
+            },
+            en: {
+                name: 'English',
+                shareholderPrompt: 'You are an experienced individual shareholder. Based on the provided financial statements and shareholder meeting materials, generate questions in English to ask the directors at the shareholder meeting.',
+                directorPrompt: 'You are a company director. Please respond in English to questions from shareholders at the shareholder meeting.',
+                summaryPrompt: 'Please summarize the following dialogue between shareholders and directors at the shareholder meeting in English.',
+                startMessage: 'Starting dialogue. Generating shareholder questions...',
+                endMessage: 'Dialogue completed. You can start a new dialogue with the "Start Dialogue" button.'
+            },
+            zh: {
+                name: '中文',
+                shareholderPrompt: '您是一位经验丰富的个人股东。基于提供的财务报表和股东大会资料，用中文生成在股东大会上向董事提出的问题。',
+                directorPrompt: '您是公司董事。请用中文回答股东大会上股东的问题。',
+                summaryPrompt: '请用中文总结以下股东大会上股东与董事的对话。',
+                startMessage: '开始对话。正在生成股东问题...',
+                endMessage: '对话已完成。您可以通过"开始对话"按钮开始新的对话。'
+            },
+            de: {
+                name: 'Deutsch',
+                shareholderPrompt: 'Sie sind ein erfahrener Privataktionär. Basierend auf den bereitgestellten Finanzberichten und Hauptversammlungsunterlagen, generieren Sie Fragen auf Deutsch, die Sie den Direktoren auf der Hauptversammlung stellen würden.',
+                directorPrompt: 'Sie sind ein Unternehmensdirektor. Bitte antworten Sie auf Deutsch auf Fragen von Aktionären auf der Hauptversammlung.',
+                summaryPrompt: 'Bitte fassen Sie den folgenden Dialog zwischen Aktionären und Direktoren auf der Hauptversammlung auf Deutsch zusammen.',
+                startMessage: 'Dialog wird gestartet. Generiere Aktionärsfragen...',
+                endMessage: 'Dialog abgeschlossen. Sie können mit der Schaltfläche "Dialog starten" einen neuen Dialog beginnen.'
+            },
+            fr: {
+                name: 'Français',
+                shareholderPrompt: 'Vous êtes un actionnaire individuel expérimenté. Basé sur les états financiers et les documents d\'assemblée d\'actionnaires fournis, générez des questions en français à poser aux directeurs lors de l\'assemblée d\'actionnaires.',
+                directorPrompt: 'Vous êtes un directeur d\'entreprise. Veuillez répondre en français aux questions des actionnaires lors de l\'assemblée d\'actionnaires.',
+                summaryPrompt: 'Veuillez résumer en français le dialogue suivant entre les actionnaires et les directeurs lors de l\'assemblée d\'actionnaires.',
+                startMessage: 'Début du dialogue. Génération des questions d\'actionnaires...',
+                endMessage: 'Dialogue terminé. Vous pouvez commencer un nouveau dialogue avec le bouton "Commencer le dialogue".'
+            },
+            es: {
+                name: 'Español',
+                shareholderPrompt: 'Eres un accionista individual experimentado. Basándote en los estados financieros y materiales de la junta de accionistas proporcionados, genera preguntas en español para hacer a los directores en la junta de accionistas.',
+                directorPrompt: 'Eres un director de la empresa. Por favor responde en español a las preguntas de los accionistas en la junta de accionistas.',
+                summaryPrompt: 'Por favor resume en español el siguiente diálogo entre accionistas y directores en la junta de accionistas.',
+                startMessage: 'Iniciando diálogo. Generando preguntas de accionistas...',
+                endMessage: 'Diálogo completado. Puedes iniciar un nuevo diálogo con el botón "Iniciar Diálogo".'
+            },
+            ko: {
+                name: '한국어',
+                shareholderPrompt: '당신은 경험이 풍부한 개인 주주입니다. 제공된 재무제표와 주주총회 자료를 바탕으로 주주총회에서 이사진에게 할 질문을 한국어로 생성해주세요.',
+                directorPrompt: '당신은 회사의 이사입니다. 주주총회에서 주주들의 질문에 한국어로 답변해주세요.',
+                summaryPrompt: '다음 주주총회에서 주주와 이사 간의 대화를 한국어로 요약해주세요.',
+                startMessage: '대화를 시작합니다. 주주 질문 생성 중...',
+                endMessage: '대화가 완료되었습니다. "대화 시작" 버튼으로 새로운 대화를 시작할 수 있습니다.'
+            }
         };
 
         // DOM要素の参照
@@ -44,6 +105,7 @@ class ShareholderDialogueApp {
         
         // 接続設定要素
         this.elements = {
+            languageSelect: document.getElementById('languageSelect'),
             endpoint: document.getElementById('endpoint'),
             apiKey: document.getElementById('apiKey'),
             deploymentName: document.getElementById('deploymentName'),
@@ -76,6 +138,7 @@ class ShareholderDialogueApp {
         console.log('🎧 イベントリスナーを設定中...');
 
         // 接続設定関連
+        this.elements.languageSelect.addEventListener('change', (e) => this.handleLanguageChange(e));
         this.elements.connectBtn.addEventListener('click', () => this.testConnection());
         this.elements.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
 
@@ -105,6 +168,7 @@ class ShareholderDialogueApp {
 
             // ローカルストレージから読み込み
             const savedConfig = JSON.parse(localStorage.getItem('azureOpenAIConfig') || '{}');
+            const savedLanguage = localStorage.getItem('selectedLanguage') || 'ja';
             
             // 設定をマージ（環境変数を優先）
             this.azureConfig = {
@@ -114,11 +178,15 @@ class ShareholderDialogueApp {
                 apiVersion: envConfig.apiVersion || savedConfig.apiVersion || '2024-02-15-preview'
             };
 
+            // 言語設定を復元
+            this.state.selectedLanguage = savedLanguage;
+
             // UIに反映
             this.elements.endpoint.value = this.azureConfig.endpoint;
             this.elements.apiKey.value = this.azureConfig.apiKey;
             this.elements.deploymentName.value = this.azureConfig.deploymentName;
             this.elements.apiVersion.value = this.azureConfig.apiVersion;
+            this.elements.languageSelect.value = this.state.selectedLanguage;
 
             console.log('✅ 設定読み込み完了:', { 
                 hasEndpoint: !!this.azureConfig.endpoint,
@@ -142,6 +210,7 @@ class ShareholderDialogueApp {
             };
 
             localStorage.setItem('azureOpenAIConfig', JSON.stringify(this.azureConfig));
+            localStorage.setItem('selectedLanguage', this.state.selectedLanguage);
             
             this.showMessage('設定が保存されました', 'success');
             console.log('✅ 設定保存完了');
@@ -149,6 +218,16 @@ class ShareholderDialogueApp {
             console.error('❌ 設定保存エラー:', error);
             this.showMessage('設定の保存に失敗しました', 'error');
         }
+    }
+
+    handleLanguageChange(event) {
+        console.log('🌐 言語変更:', event.target.value);
+        
+        this.state.selectedLanguage = event.target.value;
+        localStorage.setItem('selectedLanguage', this.state.selectedLanguage);
+        
+        const languageName = this.languageConfig[this.state.selectedLanguage].name;
+        console.log(`✅ 対話言語を${languageName}に変更しました`);
     }
 
     async testConnection() {
@@ -481,7 +560,8 @@ class ShareholderDialogueApp {
             this.preparePDFContext();
             
             // 対話開始メッセージ
-            this.addDialogueMessage('system', '対話を開始します。株主からの質問を生成中...', '🤖');
+            const langConfig = this.languageConfig[this.state.selectedLanguage];
+            this.addDialogueMessage('system', langConfig.startMessage, '🤖');
             
             await this.generateShareholderQuestion();
         } catch (error) {
@@ -516,7 +596,8 @@ class ShareholderDialogueApp {
     async generateShareholderQuestion() {
         console.log('💭 株主質問生成中...');
         
-        const systemPrompt = `あなたは経験豊富な個人株主です。提供された決算資料や株主総会資料を基に、株主総会で取締役に対して行う質問を生成してください。
+        const langConfig = this.languageConfig[this.state.selectedLanguage];
+        const systemPrompt = `${langConfig.shareholderPrompt}
 
 以下の観点から質問を作成してください：
 - 業績や財務状況に関する懸念
@@ -568,7 +649,8 @@ ${conversationHistory}`;
         
         this.showLoading(true);
 
-        const systemPrompt = `あなたは会社の取締役です。株主総会で株主からの質問に対して回答してください。
+        const langConfig = this.languageConfig[this.state.selectedLanguage];
+        const systemPrompt = `${langConfig.directorPrompt}
 
 以下の点に注意して回答してください：
 - 誠実で透明性のある回答を心がける
@@ -627,7 +709,8 @@ ${question}`;
         this.showLoading(true);
 
         const conversationHistory = this.buildConversationHistory();
-        const systemPrompt = `以下の株主総会での株主と取締役の対話を要約してください。
+        const langConfig = this.languageConfig[this.state.selectedLanguage];
+        const systemPrompt = `${langConfig.summaryPrompt}
 
 要約のポイント：
 - 主要な質問項目と回答のポイント
@@ -656,7 +739,8 @@ ${conversationHistory}`;
             // 対話終了
             this.state.isDialogueInProgress = false;
             this.elements.startDialogueBtn.disabled = false;
-            this.addDialogueMessage('system', '対話が完了しました。「対話開始」ボタンで新しい対話を始めることができます。', '✅');
+            const langConfig = this.languageConfig[this.state.selectedLanguage];
+            this.addDialogueMessage('system', langConfig.endMessage, '✅');
         } catch (error) {
             console.error('❌ 対話要約生成エラー:', error);
             this.showMessage('対話の要約生成に失敗しました', 'error');
