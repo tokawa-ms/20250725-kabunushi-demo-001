@@ -75,6 +75,13 @@
     margin: 0.5rem 0;
     position: relative;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chat-bubble:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .chat-bubble::before {
@@ -273,4 +280,150 @@ button:disabled {
     padding-left: 1rem;
     margin: 0.5rem 0;
     font-style: italic;
+}
+
+/* Modal Popup Styles */
+#chatBubbleModal {
+    backdrop-filter: blur(4px);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#chatBubbleModal.show {
+    display: flex !important;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+#chatBubbleModal .bg-white {
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Modal content styling for better readability */
+#modalContent {
+    font-size: 1.125rem;
+    line-height: 1.7;
+}
+
+#modalContent h1,
+#modalContent h2,
+#modalContent h3 {
+    color: #1f2937;
+    margin: 1.5rem 0 1rem 0;
+}
+
+#modalContent h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+}
+
+#modalContent h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+#modalContent h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+#modalContent p {
+    margin: 1rem 0;
+    color: #374151;
+}
+
+#modalContent ul,
+#modalContent ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+#modalContent li {
+    margin: 0.5rem 0;
+    color: #374151;
+}
+
+#modalContent strong {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+#modalContent em {
+    font-style: italic;
+    color: #4b5563;
+}
+
+#modalContent code {
+    background: #f3f4f6;
+    color: #1f2937;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+}
+
+#modalContent blockquote {
+    border-left: 4px solid #3b82f6;
+    background: #f8fafc;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 0.5rem;
+    font-style: italic;
+    color: #475569;
+}
+
+/* Role-specific modal title styling */
+.modal-title-shareholder {
+    color: #1d4ed8;
+}
+
+.modal-title-director {
+    color: #047857;
+}
+
+.modal-title-system {
+    color: #7c3aed;
+}
+
+/* Mobile responsiveness for modal */
+@media (max-width: 768px) {
+    #chatBubbleModal .bg-white {
+        margin: 1rem;
+        max-height: calc(100vh - 2rem);
+    }
+    
+    #modalContent {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+    
+    #modalContent h1 {
+        font-size: 1.5rem;
+    }
+    
+    #modalContent h2 {
+        font-size: 1.25rem;
+    }
+    
+    #modalContent h3 {
+        font-size: 1.125rem;
+    }
 }
