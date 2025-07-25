@@ -135,7 +135,14 @@ class ShareholderDialogueApp {
             clearDialogueBtn: document.getElementById('clearDialogueBtn'),
             dialogueStatus: document.getElementById('dialogueStatus'),
             dialogueContainer: document.getElementById('dialogueContainer'),
-            loadingIndicator: document.getElementById('loadingIndicator')
+            loadingIndicator: document.getElementById('loadingIndicator'),
+            
+            // モーダル関連要素
+            chatBubbleModal: document.getElementById('chatBubbleModal'),
+            modalTitle: document.getElementById('modalTitle'),
+            modalContent: document.getElementById('modalContent'),
+            closeModalBtn: document.getElementById('closeModalBtn'),
+            closeModalFooterBtn: document.getElementById('closeModalFooterBtn')
         };
 
         console.log('✅ DOM要素の参照初期化完了');
@@ -158,6 +165,23 @@ class ShareholderDialogueApp {
         // 対話関連
         this.elements.startDialogueBtn.addEventListener('click', () => this.startDialogue());
         this.elements.clearDialogueBtn.addEventListener('click', () => this.clearDialogue());
+
+        // モーダル関連
+        this.elements.closeModalBtn.addEventListener('click', () => this.closeModal());
+        this.elements.closeModalFooterBtn.addEventListener('click', () => this.closeModal());
+        this.elements.chatBubbleModal.addEventListener('click', (e) => {
+            // モーダル背景をクリックした時に閉じる
+            if (e.target === this.elements.chatBubbleModal) {
+                this.closeModal();
+            }
+        });
+
+        // ESCキーでモーダルを閉じる
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.elements.chatBubbleModal.classList.contains('hidden')) {
+                this.closeModal();
+            }
+        });
 
         console.log('✅ イベントリスナー設定完了');
     }
@@ -788,6 +812,12 @@ ${conversationHistory}`;
             console.log('✅ 対話要約生成完了');
             this.addDialogueMessage('system', `## 対話要約\n\n${summary}`, '📋');
             
+            // 対話完了時に要約を自動的にポップアップ表示
+            setTimeout(() => {
+                console.log('🎉 対話完了 - 要約を自動ポップアップ表示');
+                this.openModal(`## 対話要約\n\n${summary}`, 'system', '📋');
+            }, 1000);
+            
             // 対話終了
             this.state.isDialogueInProgress = false;
             this.elements.startDialogueBtn.disabled = false;
@@ -833,7 +863,7 @@ ${conversationHistory}`;
 
         messageElement.innerHTML = `
             <div class="flex ${alignClass}">
-                <div class="chat-bubble ${bubbleClass} text-white">
+                <div class="chat-bubble ${bubbleClass} text-white" data-role="${role}" data-icon="${icon}" data-content="${this.escapeHtml(content)}" title="クリックして拡大表示">
                     <div class="flex items-start gap-3">
                         <div class="text-2xl">${icon}</div>
                         <div class="chat-content flex-1">${this.renderMarkdown(content)}</div>
@@ -845,10 +875,23 @@ ${conversationHistory}`;
             </div>
         `;
 
+        // 吹き出しクリックイベントの追加
+        const chatBubble = messageElement.querySelector('.chat-bubble');
+        chatBubble.addEventListener('click', () => {
+            console.log('🔍 吹き出しクリック:', role);
+            this.openModal(content, role, icon);
+        });
+
         this.elements.dialogueContainer.appendChild(messageElement);
         
         // スムーズに最新メッセージまでスクロール
         this.scrollToLatestMessage();
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     scrollToLatestMessage() {
@@ -945,6 +988,85 @@ ${conversationHistory}`;
         } else {
             alert(`ℹ️ 情報: ${message}`);
         }
+    }
+
+    // モーダル関連メソッド
+    openModal(content, role = 'system', icon = '💬') {
+        console.log('🔍 モーダルを開く:', { role, contentLength: content.length });
+        
+        // タイトルとアイコンの設定
+        let titleText = '';
+        let titleClass = '';
+        
+        switch (role) {
+            case 'shareholder':
+                titleText = `${icon} 株主の発言`;
+                titleClass = 'modal-title-shareholder';
+                break;
+            case 'director':
+                titleText = `${icon} 取締役の回答`;
+                titleClass = 'modal-title-director';
+                break;
+            case 'system':
+                titleText = `${icon} システムメッセージ`;
+                titleClass = 'modal-title-system';
+                break;
+            default:
+                titleText = `${icon} 吹き出しの内容`;
+                titleClass = '';
+        }
+        
+        // タイトルの設定
+        this.elements.modalTitle.textContent = titleText;
+        this.elements.modalTitle.className = `text-xl font-semibold ${titleClass}`;
+        
+        // コンテンツの設定（マークダウンレンダリング適用）
+        this.elements.modalContent.innerHTML = this.renderMarkdownForModal(content);
+        
+        // モーダルを表示
+        this.elements.chatBubbleModal.classList.remove('hidden');
+        this.elements.chatBubbleModal.classList.add('show');
+        
+        // ボディのスクロールを無効化
+        document.body.style.overflow = 'hidden';
+        
+        console.log('✅ モーダル表示完了');
+    }
+
+    closeModal() {
+        console.log('❌ モーダルを閉じる');
+        
+        // モーダルを非表示
+        this.elements.chatBubbleModal.classList.remove('show');
+        this.elements.chatBubbleModal.classList.add('hidden');
+        
+        // ボディのスクロールを復元
+        document.body.style.overflow = '';
+        
+        console.log('✅ モーダル非表示完了');
+    }
+
+    renderMarkdownForModal(text) {
+        // モーダル用の強化されたマークダウンレンダリング
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+            .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+            .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+            .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
+            .replace(/^\- (.*$)/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+            .replace(/^\d+\. (.*$)/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/gs, '<ol>$1</ol>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>')
+            .replace(/^(.*)/, '<p>$1')
+            .replace(/(.*$)/, '$1</p>')
+            .replace(/<p><\/p>/g, '') // 空の段落を削除
+            .replace(/<p>(<[huo])/g, '$1') // 見出しやリストの前の段落タグを削除
+            .replace(/(<\/[huo][^>]*>)<\/p>/g, '$1'); // 見出しやリストの後の段落タグを削除
     }
 }
 
