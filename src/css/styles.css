@@ -1,5 +1,26 @@
 /* Additional custom styles for the shareholder dialogue app */
 
+/* Connection Settings Collapse Functionality */
+#connectionSettingsContent {
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    max-height: 1000px;
+    opacity: 1;
+    overflow: hidden;
+}
+
+.connection-settings-collapsed #connectionSettingsContent {
+    max-height: 0;
+    opacity: 0;
+}
+
+#collapseIcon {
+    transition: transform 0.2s ease-in-out;
+}
+
+.connection-settings-collapsed #collapseIcon {
+    transform: rotate(-90deg);
+}
+
 /* Ensure proper spacing and layout */
 .container {
     padding-left: 1rem;

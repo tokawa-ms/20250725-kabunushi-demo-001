@@ -17,7 +17,8 @@ class ShareholderDialogueApp {
             conversationTurn: 0,
             pdfContent: '',
             isDialogueInProgress: false,
-            selectedLanguage: 'ja'
+            selectedLanguage: 'ja',
+            settingsCollapsed: false
         };
 
         // Azure OpenAI設定
@@ -114,6 +115,12 @@ class ShareholderDialogueApp {
             saveSettingsBtn: document.getElementById('saveSettingsBtn'),
             connectionStatus: document.getElementById('connectionStatus'),
             
+            // 折り畳み機能要素
+            connectionSettingsContainer: document.getElementById('connectionSettingsContainer'),
+            connectionSettingsContent: document.getElementById('connectionSettingsContent'),
+            collapseToggleBtn: document.getElementById('collapseToggleBtn'),
+            collapseIcon: document.getElementById('collapseIcon'),
+            
             // PDF関連要素
             pdfInput: document.getElementById('pdfInput'),
             filesList: document.getElementById('filesList'),
@@ -141,6 +148,7 @@ class ShareholderDialogueApp {
         this.elements.languageSelect.addEventListener('change', (e) => this.handleLanguageChange(e));
         this.elements.connectBtn.addEventListener('click', () => this.testConnection());
         this.elements.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
+        this.elements.collapseToggleBtn.addEventListener('click', () => this.toggleSettingsCollapse());
 
         // PDF関連
         this.elements.pdfInput.addEventListener('change', (e) => this.handleFileUpload(e));
@@ -169,6 +177,7 @@ class ShareholderDialogueApp {
             // ローカルストレージから読み込み
             const savedConfig = JSON.parse(localStorage.getItem('azureOpenAIConfig') || '{}');
             const savedLanguage = localStorage.getItem('selectedLanguage') || 'ja';
+            const savedSettingsCollapsed = localStorage.getItem('settingsCollapsed') === 'true';
             
             // 設定をマージ（環境変数を優先）
             this.azureConfig = {
@@ -180,6 +189,7 @@ class ShareholderDialogueApp {
 
             // 言語設定を復元
             this.state.selectedLanguage = savedLanguage;
+            this.state.settingsCollapsed = savedSettingsCollapsed;
 
             // UIに反映
             this.elements.endpoint.value = this.azureConfig.endpoint;
@@ -187,6 +197,9 @@ class ShareholderDialogueApp {
             this.elements.deploymentName.value = this.azureConfig.deploymentName;
             this.elements.apiVersion.value = this.azureConfig.apiVersion;
             this.elements.languageSelect.value = this.state.selectedLanguage;
+            
+            // 折り畳み状態を復元
+            this.applyCollapseState();
 
             console.log('✅ 設定読み込み完了:', { 
                 hasEndpoint: !!this.azureConfig.endpoint,
@@ -211,6 +224,7 @@ class ShareholderDialogueApp {
 
             localStorage.setItem('azureOpenAIConfig', JSON.stringify(this.azureConfig));
             localStorage.setItem('selectedLanguage', this.state.selectedLanguage);
+            localStorage.setItem('settingsCollapsed', this.state.settingsCollapsed.toString());
             
             this.showMessage('設定が保存されました', 'success');
             console.log('✅ 設定保存完了');
@@ -228,6 +242,40 @@ class ShareholderDialogueApp {
         
         const languageName = this.languageConfig[this.state.selectedLanguage].name;
         console.log(`✅ 対話言語を${languageName}に変更しました`);
+    }
+
+    toggleSettingsCollapse() {
+        console.log('🔄 設定セクション折り畳み状態切り替え');
+        
+        this.state.settingsCollapsed = !this.state.settingsCollapsed;
+        localStorage.setItem('settingsCollapsed', this.state.settingsCollapsed.toString());
+        
+        this.applyCollapseState();
+        
+        console.log(`✅ 設定セクション: ${this.state.settingsCollapsed ? '折り畳み' : '展開'}`);
+    }
+
+    applyCollapseState() {
+        console.log('🎨 折り畳み状態を適用:', this.state.settingsCollapsed);
+        
+        if (this.state.settingsCollapsed) {
+            this.elements.connectionSettingsContainer.classList.add('connection-settings-collapsed');
+        } else {
+            this.elements.connectionSettingsContainer.classList.remove('connection-settings-collapsed');
+        }
+    }
+
+    autoCollapseSettings() {
+        console.log('🎯 接続成功後の自動折り畳み');
+        
+        // 接続成功後に自動的に折り畳む
+        if (this.state.isConnected && !this.state.settingsCollapsed) {
+            this.state.settingsCollapsed = true;
+            localStorage.setItem('settingsCollapsed', 'true');
+            this.applyCollapseState();
+            
+            console.log('✅ 接続成功により設定セクションを自動折り畳み');
+        }
     }
 
     async testConnection() {
@@ -260,6 +308,10 @@ class ShareholderDialogueApp {
                 this.updateConnectionStatus('connected', '接続成功');
                 this.showMessage('Azure OpenAIへの接続に成功しました', 'success');
                 this.updateDialogueStatus();
+                
+                // 接続成功後に自動で折り畳む
+                setTimeout(() => this.autoCollapseSettings(), 1000);
+                
                 console.log('✅ 接続テスト成功');
             } else {
                 throw new Error('予期しないレスポンス形式');
