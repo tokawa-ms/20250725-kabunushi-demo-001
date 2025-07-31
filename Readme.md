@@ -57,20 +57,40 @@
 
 ```
 📦 株主対話デモアプリケーション/
-├── 📄 README.md                 # プロジェクト概要
-├── 📁 src/                      # アプリケーションソース
+├── 📄 Readme.md                 # プロジェクト概要・クイックスタート
+├── 📁 src/                      # 🚀 アプリケーションソース
 │   ├── 📄 index.html            # メインアプリケーション
 │   ├── 📁 css/                  # スタイルシート
 │   │   └── 📄 styles.css        # カスタムCSS
-│   └── 📁 js/                   # JavaScript
-│       └── 📄 script.js         # メインアプリケーションロジック
-└── 📁 docs/                     # 技術ドキュメント
+│   ├── 📁 js/                   # JavaScript
+│   │   └── 📄 script.js         # メインアプリケーションロジック
+│   └── 📄 test-powerpoint-pdf.js # PowerPoint PDF処理テスト
+├── 📁 specs/                    # 📋 技術仕様書（NEW!）
+│   ├── 📄 README.md             # 仕様書ディレクトリ索引
+│   ├── 📄 functional-requirements.md     # 機能要件仕様書
+│   ├── 📄 non-functional-requirements.md # 非機能要件仕様書
+│   ├── 📄 technology-selection.md        # 技術選定理由書
+│   └── 📄 system-specifications.md       # システム仕様書
+└── 📁 docs/                     # 📚 利用者・開発者向けドキュメント
     ├── 📄 README.md             # ドキュメント索引
+    ├── 📄 startup-guide.md      # 🚀 起動ガイド（NEW!）
+    ├── 📄 operation-manual.md   # 📖 操作マニュアル（NEW!）
+    ├── 📄 user-manual.md        # ユーザーマニュアル
     ├── 📄 features.md           # 機能仕様書
-    ├── 📄 collapse-feature.md   # 折り畳み機能
-    ├── 📄 popup-functionality.md # ポップアップ機能
-    └── 📄 dialogue-auto-expansion.md # 自動拡張機能
+    ├── 📄 system-architecture.md # システムアーキテクチャ
+    ├── 📄 api-integration.md    # API連携ガイド
+    ├── 📄 developer-guide.md    # 開発者ガイド
+    ├── 📄 ui-design.md          # UI設計仕様書
+    └── 📄 [その他の機能仕様書...]  # 各機能の詳細仕様
 ```
+
+### 📋 ディレクトリ別用途
+
+| ディレクトリ | 用途 | 対象者 |
+|-------------|------|--------|
+| **📁 src/** | 実行可能なアプリケーション | 全ユーザー |
+| **📁 specs/** | **技術仕様書・要件定義** | **アーキテクト・開発者** |
+| **📁 docs/** | **利用ガイド・操作方法** | **全ユーザー・開発者** |
 
 ## 🚀 クイックスタート
 
@@ -209,13 +229,45 @@ python -m http.server 8000
 
 ## 📚 ドキュメント
 
-詳細な技術ドキュメントは [docs/](./docs/) ディレクトリに整備されています：
+詳細な技術ドキュメントは以下のディレクトリに体系的に整理されています：
 
-- **[機能仕様書](./docs/features.md)** - 各機能の詳細説明
-- **[UI設計書](./docs/ui-design.md)** - インターフェース設計
-- **[API連携ガイド](./docs/api-integration.md)** - Azure OpenAI 連携方法
-- **[開発者ガイド](./docs/developer-guide.md)** - 開発・カスタマイズ手順
-- **[ユーザーマニュアル](./docs/user-manual.md)** - 利用者向け詳細手順
+### 🚀 今すぐ始める（初回利用者向け）
+
+| ドキュメント | 用途 | 所要時間 |
+|-------------|------|----------|
+| **[🚀 起動ガイド](./docs/startup-guide.md)** | **Azure OpenAI準備・初回セットアップ** | **15分** |
+| **[📖 操作マニュアル](./docs/operation-manual.md)** | **画面操作・機能利用方法** | **10分** |
+
+### 📋 仕様書・技術文書（開発者向け）
+
+| ディレクトリ | 内容 | 対象者 |
+|-------------|------|--------|
+| **[📋 specs/](./specs/)** | **機能要件・非機能要件・技術選定・システム仕様** | **アーキテクト・開発者** |
+| **[📚 docs/](./docs/)** | 利用ガイド・機能仕様・API連携・開発方法 | 全ユーザー・開発者 |
+
+### ⚡ クイックアクセス
+
+```mermaid
+graph LR
+    A[新規ユーザー] --> B[🚀 起動ガイド]
+    B --> C[📖 操作マニュアル]  
+    C --> D[💻 アプリ実行]
+    
+    E[開発者] --> F[📋 specs/仕様書]
+    F --> G[📚 docs/技術文書]
+    G --> H[🔧 カスタマイズ]
+    
+    style B fill:#ffebee
+    style C fill:#e8f5e8
+    style F fill:#e3f2fd
+```
+
+### 🎯 主要な新機能ドキュメント
+
+- **包括的な仕様書**: 機能要件・非機能要件・技術選定理由・システム設計を網羅
+- **詳細な起動ガイド**: Azure OpenAI の準備からトラブルシューティングまで完全サポート
+- **操作マニュアル**: 画面ごと・機能ごとの詳細な操作手順
+- **30以上のMermaidダイアグラム**: システム構成・データフロー・UI設計を視覚化
 
 ## 🤝 コントリビューション
 
