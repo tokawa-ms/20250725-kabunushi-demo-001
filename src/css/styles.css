@@ -403,6 +403,118 @@ button:disabled {
     color: #7c3aed;
 }
 
+/* Question Candidates Section */
+#questionCandidatesContent {
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    max-height: 1000px;
+    opacity: 1;
+    overflow: hidden;
+}
+
+#questionCandidatesSection.candidates-collapsed #questionCandidatesContent {
+    max-height: 0;
+    opacity: 0;
+}
+
+#candidatesIcon {
+    transition: transform 0.2s ease-in-out;
+}
+
+#questionCandidatesSection.candidates-collapsed #candidatesIcon {
+    transform: rotate(-90deg);
+}
+
+/* Question Candidate Item Styling */
+.question-candidate {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border: 2px solid #d1d5db;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.question-candidate:hover {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.question-candidate:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.1);
+}
+
+.question-candidate::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.question-candidate:hover::before {
+    opacity: 1;
+}
+
+.question-candidate .question-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: #3b82f6;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.question-candidate .question-text {
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #374151;
+    font-weight: 500;
+}
+
+.question-candidate:hover .question-text {
+    color: #1f2937;
+}
+
+.question-candidate .question-icon {
+    font-size: 1.25rem;
+    margin-left: 0.5rem;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.question-candidate:hover .question-icon {
+    opacity: 1;
+}
+
+/* Question Candidates Loading State */
+#candidatesLoadingIndicator {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+#candidatesLoadingIndicator .loading-spinner {
+    width: 24px;
+    height: 24px;
+    border-width: 2px;
+}
+
 /* Mobile responsiveness for modal */
 @media (max-width: 768px) {
     #chatBubbleModal .bg-white {
@@ -425,5 +537,13 @@ button:disabled {
     
     #modalContent h3 {
         font-size: 1.125rem;
+    }
+    
+    .question-candidate {
+        padding: 0.75rem;
+    }
+    
+    .question-candidate .question-text {
+        font-size: 0.9rem;
     }
 }

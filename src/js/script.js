@@ -18,7 +18,10 @@ class ShareholderDialogueApp {
             pdfContent: '',
             isDialogueInProgress: false,
             selectedLanguage: 'ja',
-            settingsCollapsed: false
+            settingsCollapsed: false,
+            questionCandidates: [],
+            candidatesCollapsed: false,
+            candidatesGenerated: false
         };
 
         // Azure OpenAI設定
@@ -107,6 +110,7 @@ class ShareholderDialogueApp {
         // 接続設定要素
         this.elements = {
             languageSelect: document.getElementById('languageSelect'),
+            dialogueLanguageSelect: document.getElementById('dialogueLanguageSelect'),
             endpoint: document.getElementById('endpoint'),
             apiKey: document.getElementById('apiKey'),
             deploymentName: document.getElementById('deploymentName'),
@@ -137,6 +141,14 @@ class ShareholderDialogueApp {
             dialogueContainer: document.getElementById('dialogueContainer'),
             loadingIndicator: document.getElementById('loadingIndicator'),
             
+            // 質問候補関連要素
+            questionCandidatesSection: document.getElementById('questionCandidatesSection'),
+            questionCandidatesContent: document.getElementById('questionCandidatesContent'),
+            toggleCandidatesBtn: document.getElementById('toggleCandidatesBtn'),
+            candidatesIcon: document.getElementById('candidatesIcon'),
+            questionCandidatesList: document.getElementById('questionCandidatesList'),
+            candidatesLoadingIndicator: document.getElementById('candidatesLoadingIndicator'),
+            
             // モーダル関連要素
             chatBubbleModal: document.getElementById('chatBubbleModal'),
             modalTitle: document.getElementById('modalTitle'),
@@ -153,6 +165,7 @@ class ShareholderDialogueApp {
 
         // 接続設定関連
         this.elements.languageSelect.addEventListener('change', (e) => this.handleLanguageChange(e));
+        this.elements.dialogueLanguageSelect.addEventListener('change', (e) => this.handleDialogueLanguageChange(e));
         this.elements.connectBtn.addEventListener('click', () => this.testConnection());
         this.elements.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
         this.elements.collapseToggleBtn.addEventListener('click', () => this.toggleSettingsCollapse());
@@ -165,6 +178,9 @@ class ShareholderDialogueApp {
         // 対話関連
         this.elements.startDialogueBtn.addEventListener('click', () => this.startDialogue());
         this.elements.clearDialogueBtn.addEventListener('click', () => this.clearDialogue());
+
+        // 質問候補関連
+        this.elements.toggleCandidatesBtn.addEventListener('click', () => this.toggleCandidatesCollapse());
 
         // モーダル関連
         this.elements.closeModalBtn.addEventListener('click', () => this.closeModal());
@@ -221,9 +237,15 @@ class ShareholderDialogueApp {
             this.elements.deploymentName.value = this.azureConfig.deploymentName;
             this.elements.apiVersion.value = this.azureConfig.apiVersion;
             this.elements.languageSelect.value = this.state.selectedLanguage;
+            this.elements.dialogueLanguageSelect.value = this.state.selectedLanguage;
             
             // 折り畳み状態を復元
             this.applyCollapseState();
+            
+            // 質問候補セクションを初期状態では非表示に
+            this.elements.questionCandidatesSection.classList.add('hidden');
+            this.elements.questionCandidatesSection.style.display = 'none';
+            this.showCandidatesLoading(false);
 
             console.log('✅ 設定読み込み完了:', { 
                 hasEndpoint: !!this.azureConfig.endpoint,
@@ -264,8 +286,30 @@ class ShareholderDialogueApp {
         this.state.selectedLanguage = event.target.value;
         localStorage.setItem('selectedLanguage', this.state.selectedLanguage);
         
+        // 両方の言語セレクタを同期
+        this.elements.dialogueLanguageSelect.value = this.state.selectedLanguage;
+        
         const languageName = this.languageConfig[this.state.selectedLanguage].name;
         console.log(`✅ 対話言語を${languageName}に変更しました`);
+    }
+
+    handleDialogueLanguageChange(event) {
+        console.log('🌐 対話言語変更:', event.target.value);
+        
+        this.state.selectedLanguage = event.target.value;
+        localStorage.setItem('selectedLanguage', this.state.selectedLanguage);
+        
+        // 両方の言語セレクタを同期
+        this.elements.languageSelect.value = this.state.selectedLanguage;
+        
+        const languageName = this.languageConfig[this.state.selectedLanguage].name;
+        console.log(`✅ 対話言語を${languageName}に変更しました`);
+        
+        // 既に質問候補が生成されている場合は再生成
+        if (this.state.candidatesGenerated) {
+            console.log('🔄 言語変更により質問候補を再生成');
+            this.generateQuestionCandidates();
+        }
     }
 
     toggleSettingsCollapse() {
@@ -299,6 +343,27 @@ class ShareholderDialogueApp {
             this.applyCollapseState();
             
             console.log('✅ 接続成功により設定セクションを自動折り畳み');
+        }
+    }
+
+    toggleCandidatesCollapse() {
+        console.log('🔄 質問候補セクション折り畳み状態切り替え');
+        
+        this.state.candidatesCollapsed = !this.state.candidatesCollapsed;
+        this.applyCandidatesCollapseState();
+        
+        console.log(`✅ 質問候補セクション: ${this.state.candidatesCollapsed ? '折り畳み' : '展開'}`);
+    }
+
+    applyCandidatesCollapseState() {
+        console.log('🎨 質問候補折り畳み状態を適用:', this.state.candidatesCollapsed);
+        
+        if (this.state.candidatesCollapsed) {
+            this.elements.questionCandidatesSection.classList.add('candidates-collapsed');
+            this.elements.candidatesIcon.style.transform = 'rotate(-90deg)';
+        } else {
+            this.elements.questionCandidatesSection.classList.remove('candidates-collapsed');
+            this.elements.candidatesIcon.style.transform = 'rotate(0deg)';
         }
     }
 
@@ -936,7 +1001,156 @@ ${conversationHistory}`;
         this.elements.dialogueContainer.innerHTML = '';
         this.elements.startDialogueBtn.disabled = false;
         
+        // 質問候補セクションを展開状態に戻す
+        this.state.candidatesCollapsed = false;
+        this.applyCandidatesCollapseState();
+        
         this.showMessage('対話がクリアされました', 'success');
+    }
+
+    async generateQuestionCandidates() {
+        console.log('❓ 質問候補生成開始...');
+        
+        if (!this.state.isConnected) {
+            console.log('⚠️ Azure OpenAIに接続されていないため質問候補生成をスキップ');
+            return;
+        }
+
+        if (this.state.uploadedFiles.length === 0) {
+            console.log('⚠️ PDFファイルがないため質問候補生成をスキップ');
+            return;
+        }
+
+        try {
+            // 質問候補セクションを表示
+            this.elements.questionCandidatesSection.classList.remove('hidden');
+            this.elements.questionCandidatesSection.style.display = 'block';
+            this.showCandidatesLoading(true);
+            
+            // PDFコンテンツの準備
+            this.preparePDFContext();
+            
+            const langConfig = this.languageConfig[this.state.selectedLanguage];
+            const systemPrompt = `${langConfig.shareholderPrompt}
+
+以下の観点から6つの具体的で重要な質問を生成してください：
+1. 業績や財務状況に関する懸念
+2. 経営戦略や将来計画への疑問
+3. 株主還元政策について
+4. リスク要因や課題について
+5. 市場環境への対応について
+6. その他の重要な経営課題
+
+それぞれの質問は簡潔で分かりやすく、株主総会での実際の質問として適切なものにしてください。
+各質問は1-2文程度で、具体的な内容を含むようにしてください。
+
+資料内容：
+${this.state.pdfContent}`;
+
+            const userPrompt = '上記の資料に基づいて、株主が経営陣に対して質問すべき重要な6つの質問を生成してください。各質問は番号を付けずに、改行で区切って出力してください。';
+
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userPrompt }
+            ];
+
+            const response = await this.callAzureOpenAI(messages, 800);
+            const questionsText = response.choices[0].message.content.trim();
+            
+            // 質問を分割して配列に変換
+            const questions = questionsText
+                .split('\n')
+                .map(q => q.trim())
+                .filter(q => q.length > 0)
+                .slice(0, 6); // 最大6つまで
+
+            this.state.questionCandidates = questions;
+            this.state.candidatesGenerated = true;
+            
+            this.displayQuestionCandidates();
+            
+            console.log('✅ 質問候補生成完了:', questions.length, '個');
+        } catch (error) {
+            console.error('❌ 質問候補生成エラー:', error);
+            this.showMessage('質問候補の生成に失敗しました', 'error');
+            this.elements.questionCandidatesSection.classList.add('hidden');
+            this.elements.questionCandidatesSection.style.display = 'none';
+        } finally {
+            this.showCandidatesLoading(false);
+        }
+    }
+
+    displayQuestionCandidates() {
+        console.log('📋 質問候補表示:', this.state.questionCandidates.length, '個');
+        
+        this.elements.questionCandidatesList.innerHTML = '';
+        
+        this.state.questionCandidates.forEach((question, index) => {
+            const candidateElement = document.createElement('div');
+            candidateElement.className = 'question-candidate fade-in';
+            candidateElement.innerHTML = `
+                <div class="flex items-start">
+                    <div class="question-number">${index + 1}</div>
+                    <div class="question-text">${question}</div>
+                    <div class="question-icon">💬</div>
+                </div>
+            `;
+            
+            // クリックイベントの追加
+            candidateElement.addEventListener('click', () => {
+                console.log('🎯 質問候補クリック:', index + 1);
+                this.startDialogueWithQuestion(question);
+            });
+            
+            this.elements.questionCandidatesList.appendChild(candidateElement);
+        });
+    }
+
+    async startDialogueWithQuestion(selectedQuestion) {
+        console.log('🚀 選択された質問で対話開始:', selectedQuestion);
+        
+        // 質問候補セクションを折り畳む
+        this.state.candidatesCollapsed = true;
+        this.applyCandidatesCollapseState();
+        
+        // 対話を開始
+        if (this.state.isDialogueInProgress) {
+            this.showMessage('対話が既に進行中です', 'warning');
+            return;
+        }
+
+        this.state.isDialogueInProgress = true;
+        this.state.conversationTurn = 0;
+        this.elements.startDialogueBtn.disabled = true;
+
+        try {
+            // PDFコンテンツの準備
+            this.preparePDFContext();
+            
+            // 対話開始メッセージ
+            const langConfig = this.languageConfig[this.state.selectedLanguage];
+            this.addDialogueMessage('system', langConfig.startMessage, '🤖');
+            
+            // 選択された質問を株主の質問として追加
+            this.addDialogueMessage('shareholder', selectedQuestion, '👤');
+            this.state.dialogueHistory.push({ role: 'shareholder', content: selectedQuestion });
+
+            // 取締役の回答を生成
+            setTimeout(() => this.generateDirectorResponse(selectedQuestion), 1000);
+        } catch (error) {
+            console.error('❌ 対話開始エラー:', error);
+            this.showMessage('対話の開始に失敗しました', 'error');
+            this.state.isDialogueInProgress = false;
+            this.elements.startDialogueBtn.disabled = false;
+        }
+    }
+
+    showCandidatesLoading(show) {
+        if (show) {
+            this.elements.candidatesLoadingIndicator.classList.remove('hidden');
+        } else {
+            this.elements.candidatesLoadingIndicator.classList.add('hidden');
+        }
     }
 
     updateConnectionStatus(status, message) {
@@ -958,6 +1172,12 @@ ${conversationHistory}`;
         if (hasConnection && hasFiles) {
             this.elements.dialogueStatus.textContent = '対話を開始する準備ができました';
             this.elements.startDialogueBtn.disabled = false;
+            
+            // 質問候補がまだ生成されていない場合は生成
+            if (!this.state.candidatesGenerated) {
+                console.log('🎯 条件が整ったため質問候補を生成します');
+                this.generateQuestionCandidates();
+            }
         } else if (!hasConnection) {
             this.elements.dialogueStatus.textContent = 'Azure OpenAIに接続してください';
             this.elements.startDialogueBtn.disabled = true;
