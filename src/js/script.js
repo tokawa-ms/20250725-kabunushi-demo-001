@@ -499,6 +499,7 @@ class ShareholderDialogueApp {
         const pdf = await loadingTask.promise;
         
         console.log('📖 PDFページ数:', pdf.numPages);
+        console.log('📊 PDFメタデータ:', await pdf.getMetadata());
         
         let fullText = '';
         const pages = [];
@@ -508,12 +509,22 @@ class ShareholderDialogueApp {
             
             const page = await pdf.getPage(pageNum);
             const textContent = await page.getTextContent();
-            const pageText = textContent.items.map(item => item.str).join(' ');
+            
+            // デバッグ: 生のテキストアイテムを出力
+            console.log(`🔍 ページ ${pageNum} - 生テキストアイテム数:`, textContent.items.length);
+            
+            // PowerPoint PDFに最適化されたテキスト抽出
+            const pageText = this.extractTextFromPowerPointPDF(textContent, pageNum);
+            
+            // デバッグ: 抽出されたテキストの詳細
+            console.log(`📝 ページ ${pageNum} - 抽出テキスト長:`, pageText.length);
+            console.log(`📄 ページ ${pageNum} - 抽出テキスト内容:`, pageText.substring(0, 200) + (pageText.length > 200 ? '...' : ''));
             
             pages.push({
                 pageNumber: pageNum,
                 text: pageText,
-                page: page
+                page: page,
+                rawItems: textContent.items // デバッグ用に生データも保存
             });
             
             fullText += pageText + '\n\n';
@@ -535,7 +546,161 @@ class ShareholderDialogueApp {
             textLength: fullText.length
         });
 
+        // デバッグ: 完全なテキスト内容をコンソールに出力
+        console.log('📋 === 抽出された完全テキスト内容 (デバッグ用) ===');
+        console.log(fullText);
+        console.log('📋 === テキスト内容終了 ===');
+
         return fileData;
+    }
+
+    /**
+     * PowerPoint PDFに最適化されたテキスト抽出メソッド
+     * 座標ベースでテキストを並べ替え、重複を除去し、読みやすい形式で抽出
+     */
+    extractTextFromPowerPointPDF(textContent, pageNum) {
+        console.log(`🔧 ページ ${pageNum} - PowerPoint PDF最適化テキスト抽出開始`);
+        
+        if (!textContent.items || textContent.items.length === 0) {
+            console.log(`⚠️ ページ ${pageNum} - テキストアイテムが見つかりません`);
+            return '';
+        }
+
+        // デバッグ: 最初の数個のアイテムの詳細を出力
+        console.log(`🔍 ページ ${pageNum} - 最初の5個のテキストアイテム詳細:`);
+        textContent.items.slice(0, 5).forEach((item, index) => {
+            console.log(`  ${index}: "${item.str}" at (${item.transform[4]}, ${item.transform[5]}) size: ${item.transform[0]}`);
+        });
+
+        // フォールバック: 従来の方法も試行
+        try {
+            return this.extractTextWithCoordinateBasedSorting(textContent, pageNum);
+        } catch (error) {
+            console.warn(`⚠️ ページ ${pageNum} - 座標ベース抽出に失敗、シンプル抽出に切り替え:`, error);
+            return this.extractTextSimple(textContent, pageNum);
+        }
+    }
+
+    /**
+     * 座標ベースでのテキスト抽出（PowerPoint PDF用メイン処理）
+     */
+    extractTextWithCoordinateBasedSorting(textContent, pageNum) {
+        // テキストアイテムを位置情報付きで処理
+        const textItems = textContent.items.map(item => ({
+            text: item.str,
+            x: item.transform ? item.transform[4] : 0, // X座標
+            y: item.transform ? item.transform[5] : 0, // Y座標
+            fontSize: item.transform ? item.transform[0] : 12, // フォントサイズ
+            width: item.width || 0,
+            height: item.height || 0,
+            fontName: item.fontName || 'unknown'
+        })).filter(item => item.text && item.text.trim() !== ''); // 空のテキストを除外
+
+        console.log(`📊 ページ ${pageNum} - 有効なテキストアイテム数: ${textItems.length}`);
+
+        if (textItems.length === 0) {
+            return '';
+        }
+
+        // Y座標で降順ソート（上から下へ）、同じY座標ならX座標で昇順ソート（左から右へ）
+        textItems.sort((a, b) => {
+            // Y座標の差が5px以内なら同じ行とみなす
+            const yDiff = Math.abs(a.y - b.y);
+            if (yDiff <= 5) {
+                return a.x - b.x; // 同じ行なら左から右へ
+            }
+            return b.y - a.y; // 上から下へ
+        });
+
+        // 重複テキストの除去と行の再構成
+        const processedLines = [];
+        let currentLine = [];
+        let lastY = null;
+        let lastText = '';
+
+        for (const item of textItems) {
+            // 重複チェック: 同じテキストまたは非常に近い位置にあるテキストをスキップ
+            if (this.isDuplicateText(item.text, lastText) || 
+                this.isOverlappingPosition(item, currentLine)) {
+                console.log(`🚫 ページ ${pageNum} - 重複テキストをスキップ: "${item.text}"`);
+                continue;
+            }
+
+            // 新しい行かどうかの判定（Y座標の差が5px以上）
+            if (lastY !== null && Math.abs(item.y - lastY) > 5) {
+                if (currentLine.length > 0) {
+                    processedLines.push(currentLine.map(i => i.text).join(' ').trim());
+                    currentLine = [];
+                }
+            }
+
+            currentLine.push(item);
+            lastY = item.y;
+            lastText = item.text;
+        }
+
+        // 最後の行を追加
+        if (currentLine.length > 0) {
+            processedLines.push(currentLine.map(i => i.text).join(' ').trim());
+        }
+
+        // 空行を除去して結合
+        const result = processedLines
+            .filter(line => line.trim() !== '')
+            .join('\n');
+
+        console.log(`✅ ページ ${pageNum} - 座標ベーステキスト抽出完了: ${result.length}文字`);
+        console.log(`📝 ページ ${pageNum} - 抽出された行数: ${processedLines.length}`);
+        
+        return result;
+    }
+
+    /**
+     * シンプルなテキスト抽出（フォールバック用）
+     */
+    extractTextSimple(textContent, pageNum) {
+        console.log(`🔄 ページ ${pageNum} - シンプルテキスト抽出実行`);
+        
+        const simpleText = textContent.items
+            .map(item => item.str)
+            .filter(text => text && text.trim() !== '')
+            .join(' ');
+        
+        console.log(`✅ ページ ${pageNum} - シンプル抽出完了: ${simpleText.length}文字`);
+        return simpleText;
+    }
+
+    /**
+     * テキストの重複をチェック
+     */
+    isDuplicateText(text1, text2) {
+        if (!text1 || !text2) return false;
+        
+        // 完全一致
+        if (text1 === text2) return true;
+        
+        // 部分的一致（片方が他方を含む場合）
+        if (text1.length > 3 && text2.length > 3) {
+            return text1.includes(text2) || text2.includes(text1);
+        }
+        
+        return false;
+    }
+
+    /**
+     * 重複する位置にあるテキストかどうかをチェック
+     */
+    isOverlappingPosition(newItem, existingLine) {
+        for (const existingItem of existingLine) {
+            const xDiff = Math.abs(newItem.x - existingItem.x);
+            const yDiff = Math.abs(newItem.y - existingItem.y);
+            
+            // 位置が非常に近い場合は重複とみなす
+            if (xDiff < 10 && yDiff < 5) {
+                return true;
+            }
+        }
+        return false;
     }
 
     addFileToList(fileData) {
@@ -720,18 +885,29 @@ class ShareholderDialogueApp {
         
         let combinedContent = '';
         this.state.uploadedFiles.forEach(file => {
+            console.log(`📝 ファイル "${file.name}" をコンテキストに追加中...`);
+            console.log(`📊 ファイル "${file.name}" のテキスト長: ${file.fullText.length}文字`);
+            
             combinedContent += `\n\n=== ${file.name} ===\n${file.fullText}`;
         });
+
+        console.log(`📋 結合前の総テキスト長: ${combinedContent.length}文字`);
 
         // コンテキスト長を制限（トークン数を概算）
         const maxLength = 20000; // 約15,000トークン相当
         if (combinedContent.length > maxLength) {
+            const originalLength = combinedContent.length;
             combinedContent = combinedContent.substring(0, maxLength) + '...\n[文書が長いため、以下省略]';
-            console.log('⚠️ PDFコンテンツが長いため切り詰められました');
+            console.log(`⚠️ PDFコンテンツが長いため切り詰められました: ${originalLength} → ${combinedContent.length}文字`);
         }
 
         this.state.pdfContent = combinedContent;
         console.log('✅ PDFコンテキスト準備完了:', { length: combinedContent.length });
+        
+        // デバッグ: 準備されたコンテキストの内容を部分的に出力
+        console.log('📄 === 準備されたPDFコンテキスト (最初の500文字) ===');
+        console.log(combinedContent.substring(0, 500) + (combinedContent.length > 500 ? '...' : ''));
+        console.log('📄 === コンテキスト内容終了 ===');
     }
 
     async generateShareholderQuestion() {
