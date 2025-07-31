@@ -163,6 +163,22 @@
                 <!-- Dialogue Control -->
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-semibold mb-4 text-gray-800">💬 対話シミュレーション</h2>
+                    
+                    <!-- Language Selection for Dialogue -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">🌐 生成言語</label>
+                        <select id="dialogueLanguageSelect" class="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="ja">日本語</option>
+                            <option value="en">English</option>
+                            <option value="zh">中文</option>
+                            <option value="de">Deutsch</option>
+                            <option value="fr">Français</option>
+                            <option value="es">Español</option>
+                            <option value="ko">한국어</option>
+                        </select>
+                        <p class="text-sm text-gray-500 mt-1">対話で使用される言語を選択してください</p>
+                    </div>
+                    
                     <div class="flex gap-4 mb-4">
                         <button id="startDialogueBtn" 
                                 class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
@@ -175,6 +191,29 @@
                     </div>
                     <div id="dialogueStatus" class="text-sm text-gray-600">
                         Azure OpenAIに接続してPDFファイルをアップロードしてから対話を開始してください
+                    </div>
+                </div>
+
+                <!-- Question Candidates Section -->
+                <div id="questionCandidatesSection" class="bg-white rounded-lg shadow-md p-6 hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800">❓ 株主質問候補</h2>
+                        <button id="toggleCandidatesBtn" class="text-gray-600 hover:text-gray-800 transition-colors p-2 rounded-md hover:bg-gray-100" title="質問候補を折り畳む/展開する">
+                            <svg id="candidatesIcon" class="w-5 h-5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div id="questionCandidatesContent" class="transition-all duration-300 ease-in-out overflow-hidden">
+                        <p class="text-gray-600 mb-4">PDF資料の内容に基づいて生成された質問候補です。クリックして対話を開始してください。</p>
+                        <div id="questionCandidatesList" class="space-y-3">
+                            <!-- Question candidates will be dynamically added here -->
+                        </div>
+                        <div id="candidatesLoadingIndicator" class="hidden flex justify-center mt-4">
+                            <div class="loading-spinner"></div>
+                            <span class="ml-2 text-gray-600">質問候補を生成中...</span>
+                        </div>
                     </div>
                 </div>
 
