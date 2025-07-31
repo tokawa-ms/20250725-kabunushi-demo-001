@@ -252,9 +252,72 @@ class ShareholderDialogueApp {
                 hasApiKey: !!this.azureConfig.apiKey,
                 hasDeploymentName: !!this.azureConfig.deploymentName
             });
+            
+            // キャッシュされた接続設定がある場合は自動接続テストを実行
+            this.checkCachedConnection();
         } catch (error) {
             console.error('❌ 設定読み込みエラー:', error);
         }
+    }
+
+    async checkCachedConnection() {
+        console.log('🔍 キャッシュされた接続設定をチェック中...');
+        
+        // 必須設定項目がすべて揃っているかチェック
+        const hasCompleteConfig = this.azureConfig.endpoint && 
+                                  this.azureConfig.apiKey && 
+                                  this.azureConfig.deploymentName;
+        
+        if (!hasCompleteConfig) {
+            console.log('⚠️ 不完全な設定のため自動接続テストをスキップ');
+            this.updateConnectionStatus('disconnected', '未接続 - 設定を入力してください');
+            return;
+        }
+
+        console.log('🚀 キャッシュされた設定で自動接続テスト開始...');
+        this.updateConnectionStatus('connecting', '自動接続テスト中...');
+
+        try {
+            // テスト用リクエスト
+            const response = await this.callAzureOpenAI([
+                { role: 'user', content: 'Hello, this is an automatic connection test.' }
+            ], 10);
+
+            if (response && response.choices && response.choices[0]) {
+                console.log('✅ 自動接続テスト成功');
+                this.state.isConnected = true;
+                this.updateConnectionStatus('connected', '自動接続成功');
+                this.showMessage('キャッシュされた設定でAzure OpenAIへの接続に成功しました', 'success');
+                this.updateDialogueStatus();
+                
+                // 接続成功時は設定を自動的に折り畳む
+                if (!this.state.settingsCollapsed) {
+                    setTimeout(() => this.autoCollapseSettings(), 500);
+                }
+            } else {
+                throw new Error('予期しないレスポンス形式');
+            }
+        } catch (error) {
+            console.error('❌ 自動接続テストエラー:', error);
+            this.state.isConnected = false;
+            this.updateConnectionStatus('disconnected', '接続エラー');
+            this.showConnectionError(`接続エラー: ${error.message}`);
+        }
+    }
+
+    showConnectionError(errorMessage) {
+        console.log('⚠️ 接続エラー表示:', errorMessage);
+        
+        // 設定ペインを強制的に展開する
+        this.state.settingsCollapsed = false;
+        localStorage.setItem('settingsCollapsed', 'false');
+        this.applyCollapseState();
+        
+        // エラーメッセージを表示
+        this.showMessage(errorMessage, 'error');
+        
+        // 対話状況を更新
+        this.updateDialogueStatus();
     }
 
     saveSettings() {
