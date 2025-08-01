@@ -40,7 +40,12 @@ class ShareholderDialogueApp {
                 directorPrompt: 'あなたは会社の取締役です。株主総会で株主からの質問に対して日本語で回答してください。',
                 summaryPrompt: '以下の株主総会での株主と取締役の対話を日本語で要約してください。',
                 startMessage: '対話を開始します。株主からの質問を生成中...',
-                endMessage: '対話が完了しました。「対話開始」ボタンで新しい対話を始めることができます。'
+                endMessage: '対話が完了しました。「対話開始」ボタンで新しい対話を始めることができます。',
+                customQuestionTitle: '💬 独自の質問を入力',
+                customQuestionDescription: '上記の質問候補に加えて、ご自身で考えた質問を入力して対話を開始することもできます。',
+                customQuestionLabel: '質問内容',
+                customQuestionPlaceholder: 'ここに質問を入力してください（例：今期の売上が前年同期比で減少している理由を教えてください）',
+                customQuestionSubmit: 'この質問で対話開始'
             },
             en: {
                 name: 'English',
@@ -48,7 +53,12 @@ class ShareholderDialogueApp {
                 directorPrompt: 'You are a company director. Please respond in English to questions from shareholders at the shareholder meeting.',
                 summaryPrompt: 'Please summarize the following dialogue between shareholders and directors at the shareholder meeting in English.',
                 startMessage: 'Starting dialogue. Generating shareholder questions...',
-                endMessage: 'Dialogue completed. You can start a new dialogue with the "Start Dialogue" button.'
+                endMessage: 'Dialogue completed. You can start a new dialogue with the "Start Dialogue" button.',
+                customQuestionTitle: '💬 Enter Your Own Question',
+                customQuestionDescription: 'In addition to the question candidates above, you can also enter your own question to start a dialogue.',
+                customQuestionLabel: 'Question Content',
+                customQuestionPlaceholder: 'Please enter your question here (e.g., Could you explain the reasons for the year-over-year decline in sales this quarter?)',
+                customQuestionSubmit: 'Start Dialogue with This Question'
             },
             zh: {
                 name: '中文',
@@ -56,7 +66,12 @@ class ShareholderDialogueApp {
                 directorPrompt: '您是公司董事。请用中文回答股东大会上股东的问题。',
                 summaryPrompt: '请用中文总结以下股东大会上股东与董事的对话。',
                 startMessage: '开始对话。正在生成股东问题...',
-                endMessage: '对话已完成。您可以通过"开始对话"按钮开始新的对话。'
+                endMessage: '对话已完成。您可以通过"开始对话"按钮开始新的对话。',
+                customQuestionTitle: '💬 输入您自己的问题',
+                customQuestionDescription: '除了上述问题候选外，您还可以输入自己的问题来开始对话。',
+                customQuestionLabel: '问题内容',
+                customQuestionPlaceholder: '请在此输入您的问题（例如：请解释本季度销售额同比下降的原因）',
+                customQuestionSubmit: '用此问题开始对话'
             },
             de: {
                 name: 'Deutsch',
@@ -64,7 +79,12 @@ class ShareholderDialogueApp {
                 directorPrompt: 'Sie sind ein Unternehmensdirektor. Bitte antworten Sie auf Deutsch auf Fragen von Aktionären auf der Hauptversammlung.',
                 summaryPrompt: 'Bitte fassen Sie den folgenden Dialog zwischen Aktionären und Direktoren auf der Hauptversammlung auf Deutsch zusammen.',
                 startMessage: 'Dialog wird gestartet. Generiere Aktionärsfragen...',
-                endMessage: 'Dialog abgeschlossen. Sie können mit der Schaltfläche "Dialog starten" einen neuen Dialog beginnen.'
+                endMessage: 'Dialog abgeschlossen. Sie können mit der Schaltfläche "Dialog starten" einen neuen Dialog beginnen.',
+                customQuestionTitle: '💬 Eigene Frage eingeben',
+                customQuestionDescription: 'Zusätzlich zu den obigen Fragenkandidaten können Sie auch Ihre eigene Frage eingeben, um einen Dialog zu starten.',
+                customQuestionLabel: 'Frageinhalt',
+                customQuestionPlaceholder: 'Bitte geben Sie hier Ihre Frage ein (z.B.: Können Sie die Gründe für den Rückgang der Verkäufe im Vergleich zum Vorjahreszeitraum erläutern?)',
+                customQuestionSubmit: 'Dialog mit dieser Frage starten'
             },
             fr: {
                 name: 'Français',
@@ -72,7 +92,12 @@ class ShareholderDialogueApp {
                 directorPrompt: 'Vous êtes un directeur d\'entreprise. Veuillez répondre en français aux questions des actionnaires lors de l\'assemblée d\'actionnaires.',
                 summaryPrompt: 'Veuillez résumer en français le dialogue suivant entre les actionnaires et les directeurs lors de l\'assemblée d\'actionnaires.',
                 startMessage: 'Début du dialogue. Génération des questions d\'actionnaires...',
-                endMessage: 'Dialogue terminé. Vous pouvez commencer un nouveau dialogue avec le bouton "Commencer le dialogue".'
+                endMessage: 'Dialogue terminé. Vous pouvez commencer un nouveau dialogue avec le bouton "Commencer le dialogue".',
+                customQuestionTitle: '💬 Saisir votre propre question',
+                customQuestionDescription: 'En plus des candidats de questions ci-dessus, vous pouvez également saisir votre propre question pour commencer un dialogue.',
+                customQuestionLabel: 'Contenu de la question',
+                customQuestionPlaceholder: 'Veuillez saisir votre question ici (ex: Pourriez-vous expliquer les raisons de la baisse des ventes par rapport à la même période l\'année dernière ?)',
+                customQuestionSubmit: 'Commencer le dialogue avec cette question'
             },
             es: {
                 name: 'Español',
@@ -80,7 +105,12 @@ class ShareholderDialogueApp {
                 directorPrompt: 'Eres un director de la empresa. Por favor responde en español a las preguntas de los accionistas en la junta de accionistas.',
                 summaryPrompt: 'Por favor resume en español el siguiente diálogo entre accionistas y directores en la junta de accionistas.',
                 startMessage: 'Iniciando diálogo. Generando preguntas de accionistas...',
-                endMessage: 'Diálogo completado. Puedes iniciar un nuevo diálogo con el botón "Iniciar Diálogo".'
+                endMessage: 'Diálogo completado. Puedes iniciar un nuevo diálogo con el botón "Iniciar Diálogo".',
+                customQuestionTitle: '💬 Introduce tu propia pregunta',
+                customQuestionDescription: 'Además de los candidatos de preguntas anteriores, también puedes introducir tu propia pregunta para iniciar un diálogo.',
+                customQuestionLabel: 'Contenido de la pregunta',
+                customQuestionPlaceholder: 'Por favor introduce tu pregunta aquí (ej: ¿Podrían explicar las razones de la disminución de las ventas en comparación con el mismo período del año pasado?)',
+                customQuestionSubmit: 'Iniciar diálogo con esta pregunta'
             },
             ko: {
                 name: '한국어',
@@ -88,7 +118,12 @@ class ShareholderDialogueApp {
                 directorPrompt: '당신은 회사의 이사입니다. 주주총회에서 주주들의 질문에 한국어로 답변해주세요.',
                 summaryPrompt: '다음 주주총회에서 주주와 이사 간의 대화를 한국어로 요약해주세요.',
                 startMessage: '대화를 시작합니다. 주주 질문 생성 중...',
-                endMessage: '대화가 완료되었습니다. "대화 시작" 버튼으로 새로운 대화를 시작할 수 있습니다.'
+                endMessage: '대화가 완료되었습니다. "대화 시작" 버튼으로 새로운 대화를 시작할 수 있습니다.',
+                customQuestionTitle: '💬 직접 질문 입력',
+                customQuestionDescription: '위의 질문 후보 외에도 직접 생각한 질문을 입력하여 대화를 시작할 수 있습니다.',
+                customQuestionLabel: '질문 내용',
+                customQuestionPlaceholder: '여기에 질문을 입력해주세요 (예: 이번 분기 매출이 전년 동기 대비 감소한 이유를 설명해주시겠습니까?)',
+                customQuestionSubmit: '이 질문으로 대화 시작'
             }
         };
 
@@ -149,6 +184,11 @@ class ShareholderDialogueApp {
             questionCandidatesList: document.getElementById('questionCandidatesList'),
             candidatesLoadingIndicator: document.getElementById('candidatesLoadingIndicator'),
             
+            // カスタム質問関連要素
+            customQuestionSection: document.getElementById('customQuestionSection'),
+            customQuestionInput: document.getElementById('customQuestionInput'),
+            submitCustomQuestionBtn: document.getElementById('submitCustomQuestionBtn'),
+            
             // モーダル関連要素
             chatBubbleModal: document.getElementById('chatBubbleModal'),
             modalTitle: document.getElementById('modalTitle'),
@@ -181,6 +221,10 @@ class ShareholderDialogueApp {
 
         // 質問候補関連
         this.elements.toggleCandidatesBtn.addEventListener('click', () => this.toggleCandidatesCollapse());
+
+        // カスタム質問関連
+        this.elements.customQuestionInput.addEventListener('input', () => this.handleCustomQuestionInput());
+        this.elements.submitCustomQuestionBtn.addEventListener('click', () => this.submitCustomQuestion());
 
         // モーダル関連
         this.elements.closeModalBtn.addEventListener('click', () => this.closeModal());
@@ -246,6 +290,9 @@ class ShareholderDialogueApp {
             this.elements.questionCandidatesSection.classList.add('hidden');
             this.elements.questionCandidatesSection.style.display = 'none';
             this.showCandidatesLoading(false);
+
+            // カスタム質問セクションの言語を初期化
+            this.updateCustomQuestionLanguage();
 
             console.log('✅ 設定読み込み完了:', { 
                 hasEndpoint: !!this.azureConfig.endpoint,
@@ -352,6 +399,9 @@ class ShareholderDialogueApp {
         // 両方の言語セレクタを同期
         this.elements.dialogueLanguageSelect.value = this.state.selectedLanguage;
         
+        // カスタム質問セクションの言語を更新
+        this.updateCustomQuestionLanguage();
+        
         const languageName = this.languageConfig[this.state.selectedLanguage].name;
         console.log(`✅ 対話言語を${languageName}に変更しました`);
     }
@@ -364,6 +414,9 @@ class ShareholderDialogueApp {
         
         // 両方の言語セレクタを同期
         this.elements.languageSelect.value = this.state.selectedLanguage;
+        
+        // カスタム質問セクションの言語を更新
+        this.updateCustomQuestionLanguage();
         
         const languageName = this.languageConfig[this.state.selectedLanguage].name;
         console.log(`✅ 対話言語を${languageName}に変更しました`);
@@ -1526,6 +1579,71 @@ ${this.state.pdfContent}`;
             .replace(/<p><\/p>/g, '') // 空の段落を削除
             .replace(/<p>(<[huo])/g, '$1') // 見出しやリストの前の段落タグを削除
             .replace(/(<\/[huo][^>]*>)<\/p>/g, '$1'); // 見出しやリストの後の段落タグを削除
+    }
+
+    // カスタム質問入力関連メソッド
+    handleCustomQuestionInput() {
+        console.log('📝 カスタム質問入力の変更を検知');
+        
+        const question = this.elements.customQuestionInput.value.trim();
+        const isValid = question.length > 0;
+        
+        // ボタンの有効/無効を切り替え
+        this.elements.submitCustomQuestionBtn.disabled = !isValid;
+        
+        console.log(`💬 カスタム質問: "${question}" (有効: ${isValid})`);
+    }
+
+    async submitCustomQuestion() {
+        console.log('🚀 カスタム質問送信開始...');
+        
+        const question = this.elements.customQuestionInput.value.trim();
+        
+        if (!question) {
+            this.showMessage('質問を入力してください', 'warning');
+            return;
+        }
+
+        if (!this.state.isConnected) {
+            this.showMessage('Azure OpenAIに接続してください', 'warning');
+            return;
+        }
+
+        if (this.state.uploadedFiles.length === 0) {
+            this.showMessage('PDFファイルをアップロードしてください', 'warning');
+            return;
+        }
+
+        console.log(`✅ カスタム質問で対話開始: "${question}"`);
+        
+        // 入力フィールドをクリア
+        this.elements.customQuestionInput.value = '';
+        this.elements.submitCustomQuestionBtn.disabled = true;
+        
+        // 選択された質問で対話開始
+        await this.startDialogueWithQuestion(question);
+    }
+
+    updateCustomQuestionLanguage() {
+        console.log('🌐 カスタム質問セクションの言語を更新:', this.state.selectedLanguage);
+        
+        const langConfig = this.languageConfig[this.state.selectedLanguage];
+        
+        // タイトルとテキストを更新
+        const titleElement = this.elements.customQuestionSection.querySelector('h3');
+        const descriptionElement = this.elements.customQuestionSection.querySelector('p');
+        const labelElement = this.elements.customQuestionSection.querySelector('label');
+        const submitButton = this.elements.submitCustomQuestionBtn.querySelector('span:last-child');
+        
+        if (titleElement) titleElement.textContent = langConfig.customQuestionTitle;
+        if (descriptionElement) descriptionElement.textContent = langConfig.customQuestionDescription;
+        if (labelElement) labelElement.textContent = langConfig.customQuestionLabel;
+        if (submitButton) submitButton.textContent = langConfig.customQuestionSubmit;
+        
+        // プレースホルダーテキストを更新
+        this.elements.customQuestionInput.placeholder = langConfig.customQuestionPlaceholder;
+        
+        console.log('✅ カスタム質問セクションの言語更新完了');
     }
 }
 

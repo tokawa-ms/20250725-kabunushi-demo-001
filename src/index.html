@@ -214,6 +214,33 @@
                             <div class="loading-spinner"></div>
                             <span class="ml-2 text-gray-600">質問候補を生成中...</span>
                         </div>
+                        
+                        <!-- Custom Question Input Section -->
+                        <div id="customQuestionSection" class="mt-6 pt-6 border-t border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-800 mb-3">💬 独自の質問を入力</h3>
+                            <p class="text-gray-600 text-sm mb-4">上記の質問候補に加えて、ご自身で考えた質問を入力して対話を開始することもできます。</p>
+                            <div class="space-y-3">
+                                <div>
+                                    <label for="customQuestionInput" class="block text-sm font-medium text-gray-700 mb-2">質問内容</label>
+                                    <textarea 
+                                        id="customQuestionInput" 
+                                        rows="3" 
+                                        placeholder="ここに質問を入力してください（例：今期の売上が前年同期比で減少している理由を教えてください）"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    ></textarea>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button 
+                                        id="submitCustomQuestionBtn"
+                                        class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                                        disabled
+                                    >
+                                        <span>🚀</span>
+                                        <span>この質問で対話開始</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
