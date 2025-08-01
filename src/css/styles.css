@@ -515,6 +515,75 @@ button:disabled {
     border-width: 2px;
 }
 
+/* Custom Question Input Section */
+#customQuestionSection {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    border: 1px solid #e9d5ff;
+}
+
+#customQuestionSection h3 {
+    color: #7c3aed;
+    margin-bottom: 0.75rem;
+}
+
+#customQuestionInput {
+    transition: all 0.2s ease;
+    min-height: 80px;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+#customQuestionInput:focus {
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    border-color: #8b5cf6;
+}
+
+#customQuestionInput::placeholder {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+#submitCustomQuestionBtn {
+    transition: all 0.2s ease;
+    font-weight: 500;
+    min-width: 200px;
+}
+
+#submitCustomQuestionBtn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+#submitCustomQuestionBtn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+#submitCustomQuestionBtn:disabled {
+    background: #9ca3af !important;
+    cursor: not-allowed;
+}
+
+/* Custom Question Section Mobile Responsiveness */
+@media (max-width: 768px) {
+    #customQuestionSection {
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    #customQuestionInput {
+        font-size: 1rem;
+        min-height: 100px;
+    }
+    
+    #submitCustomQuestionBtn {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
 /* Mobile responsiveness for modal */
 @media (max-width: 768px) {
     #chatBubbleModal .bg-white {
